@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BattleZone</title><style>
+*{box-sizing:border-box}body{margin:0;background:#090b12;color:#f5f7ff;font:15px system-ui,Arial}
+.app{max-width:480px;margin:auto;min-height:100vh;background:#111522;padding-bottom:82px}
+header{padding:20px 18px 10px;position:sticky;top:0;background:#111522ee;backdrop-filter:blur(10px);z-index:3}
+.logo{font-size:24px;font-weight:900}.accent{color:#7c5cff}.sub{color:#8e96aa;font-size:12px}
+main{padding:12px 16px}.card{background:#191e2d;border:1px solid #272e42;border-radius:18px;padding:16px;margin:12px 0}
+.hero{padding:20px;background:linear-gradient(135deg,#201b4a,#171b2c);border-radius:22px}
+h2{margin:4px 0 8px}h3{margin:4px 0}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;background:#7c5cff;color:white}
+button.secondary{background:#252b3d}button.danger{background:#b83c58}.pill{padding:5px 9px;border-radius:20px;background:#242a3d;color:#aeb7cd;font-size:12px}
+input{width:100%;padding:12px;border-radius:12px;border:1px solid #30384e;background:#0e121c;color:white;margin:5px 0 10px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:#151a28;border-top:1px solid #292f42;display:flex;z-index:5}
+nav button{flex:1;background:none;color:#9099b0;border-radius:0;font-size:11px;padding:12px 3px}nav button.active{color:white}
+.hidden{display:none}.stat{font-size:22px;font-weight:900}.muted{color:#929bb0}.ok{color:#5be29a}.warn{color:#ffc857}
+</style></head><body><div class="app">
+<header><div class="logo">⚡ <span class="accent">Battle</span>Zone</div><div class="sub">Tournament platform • Demo/Sandbox</div></header>
+<main id="screen"></main>
+<nav>
+<button data-page="home">🏠<br>Home</button><button data-page="tournaments">🏆<br>Tournaments</button>
+<button data-page="matches">🎮<br>Matches</button><button data-page="wallet">💳<br>Wallet</button><button data-page="profile">👤<br>Profile</button>
+</nav></div>
+<script>
+let token=localStorage.bz_token||"", user=null;
+const $=s=>document.querySelector(s);
+async function api(url,opt={}){opt.headers={...(opt.headers||{}),...(token?{Authorization:"Bearer "+token}:{}) ,"Content-Type":"application/json"};let r=await fetch(url,opt);let d=await r.json();if(!r.ok)throw Error(d.error||"Request failed");return d}
+async function refresh(){if(token){try{user=await api("/api/me")}catch(e){token="";localStorage.removeItem("bz_token")}}}
+function page(p){document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===p));({home,tournaments,matches,wallet,profile}[p]||home)()}
+function home(){screen.innerHTML=`<div class=hero><div class=sub>WELCOME TO</div><h2>BattleZone Arena</h2><p class=muted>Join skill-based gaming tournaments and track your matches.</p><button onclick="page('tournaments')">Explore Tournaments →</button></div>
+<div class=card><div class=row><div><div class=sub>YOUR CREDITS</div><div class=stat>${user?user.credits:"—"}</div></div><div>🏆</div></div></div>
+<div class=card><h3>Live Features</h3><p class=muted>Authentication • Tournament entry • Match history • Leaderboard • Admin controls</p></div>
+${!user?`<button onclick="authBox()">Login / Register</button>`:""}`; }
+async function tournaments(){let ts=await api("/api/tournaments");screen.innerHTML=`<h2>Tournaments</h2>${ts.map(t=>`<div class=card><div class=row><div><h3>${t.title}</h3><div class=muted>${t.game} • ${t.start_at}</div></div><span class=pill>${t.status}</span></div><p>Entry: <b>${t.entry}</b> credits &nbsp; Prize: <b>${t.prize}</b> &nbsp; Slots: ${t.joined}/${t.slots}</p><button onclick="join(${t.id})" ${t.status!=="OPEN"?"disabled":""}>Join Tournament</button></div>`).join("")}`}
+async function join(id){if(!user)return authBox();try{await api("/api/tournaments/"+id+"/join",{method:"POST"});alert("Joined successfully!");await refresh();tournaments()}catch(e){alert(e.message)}}
+async function matches(){if(!user)return authBox();let m=await api("/api/my/matches");screen.innerHTML=`<h2>My Matches</h2>${m.length?m.map(x=>`<div class=card><h3>${x.title}</h3><div class=muted>${x.game} • ${x.start_at}</div><p>Entry ${x.entry} • Prize ${x.prize}</p><span class=pill>${x.status}</span></div>`).join(""):`<div class=card>No matches yet. Join a tournament first.</div>`}`}
+async function wallet(){if(!user)return authBox();let tx=await api("/api/transactions");screen.innerHTML=`<h2>Wallet</h2><div class=card><div class=sub>DEMO CREDITS</div><div class=stat>${user.credits}</div><p class=muted>Sandbox only — no real money or withdrawals.</p></div><h3>Transactions</h3>${tx.map(x=>`<div class=card><div class=row><span>${x.note}</span><b class=${x.amount>=0?"ok":"warn"}>${x.amount>0?"+":""}${x.amount}</b></div></div>`).join("")}`}
+function profile(){screen.innerHTML=user?`<h2>Profile</h2><div class=card><h3>${user.name}</h3><p class=muted>${user.email}</p><p>Credits: <b>${user.credits}</b></p>${user.is_admin?`<button onclick="admin()">👑 Admin Panel</button>`:""} <button class=secondary onclick="logout()">Logout</button></div>`:`<div class=card><h2>Guest</h2><p class=muted>Login to access your profile.</p><button onclick=authBox()>Login / Register</button></div>`}
+function authBox(){screen.innerHTML=`<h2>Account</h2><div class=card><input id=n placeholder="Name (for register)"><input id=e placeholder="Email"><input id=p type=password placeholder="Password (6+ chars)"><div class=row><button onclick="register()">Register</button><button class=secondary onclick="login()">Login</button></div></div>`}
+async function register(){try{let d=await api("/api/auth/register",{method:"POST",body:JSON.stringify({name:n.value,email:e.value,password:p.value})});token=d.token;localStorage.bz_token=token;await refresh();page("home")}catch(x){alert(x.message)}}
+async function login(){try{let d=await api("/api/auth/login",{method:"POST",body:JSON.stringify({email:e.value,password:p.value})});token=d.token;localStorage.bz_token=token;await refresh();page("home")}catch(x){alert(x.message)}}
+function logout(){token="";user=null;localStorage.removeItem("bz_token");page("home")}
+async function admin(){if(!user?.is_admin)return;let s=await api("/api/admin/stats"),ts=await api("/api/tournaments");screen.innerHTML=`<h2>Admin Panel</h2><div class=card><div class=row><div>Users<br><b>${s.users}</b></div><div>Tournaments<br><b>${s.tournaments}</b></div><div>Entries<br><b>${s.entries}</b></div></div></div><div class=card><h3>Create Tournament</h3><input id=at placeholder="Title"><input id=ag placeholder="Game"><input id=ae type=number placeholder="Entry credits"><input id=ap type=number placeholder="Prize credits"><input id=as type=number placeholder="Slots"><input id=ast placeholder="Start time"><button onclick="createT()">Create</button></div>${ts.map(t=>`<div class=card><div class=row><span>${t.title}</span><button class=danger onclick="closeT(${t.id})">Close</button></div></div>`).join("")}`}
+async function createT(){try{await api("/api/admin/tournaments",{method:"POST",body:JSON.stringify({title:at.value,game:ag.value,entry:ae.value,prize:ap.value,slots:as.value,start_at:ast.value})});admin()}catch(e){alert(e.message)}}
+async function closeT(id){try{await api("/api/admin/tournaments/"+id+"/close",{method:"POST"});admin()}catch(e){alert(e.message)}}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>page(b.dataset.page));
+(async()=>{await refresh();page("home")})();
+</script></body></html>
