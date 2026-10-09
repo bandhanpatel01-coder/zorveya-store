@@ -49,4 +49,53 @@
 <section class="section story" id="story"><div class="story-photo"><img loading="lazy" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=85" alt="Fashion and personal style"></div><div><div class="eyebrow">The ZORVÉYA point of view</div><h2>Wear what feels<br>like <span style="color:var(--gold);font-style:italic">you.</span></h2><p>ZORVÉYA is built around personal style: versatile essentials, confident silhouettes and thoughtful details that let your individuality lead. Less noise, more you.</p><p class="note">Product images and listings are examples for this storefront template. Confirm actual stock, sizes, delivery details and prices before accepting customer orders.</p><a href="#shop" class="btn btn-outline">BACK TO THE COLLECTION ↗</a></div></section>
 </main>
 <footer class="footer"><div class="footer-grid"><div><div class="footer-logo">ZORVÉYA</div><p>The art of everyday. Considered fashion for your own point of view.</p></div><div><h4>Explore</h4><a href="#shop">New arrivals</a><a href="#categories">Shop categories</a><a href="#story">Our story</a></div><div><h4>Customer note</h4><span>For availability, sizing and delivery, contact us through the order enquiry.</span><span>© <span id="year"></span> ZORVÉYA</span></div></div><div class="copyright"><span>© <span id="yearBottom"></span> ZORVÉYA FASHION</span><span>MADE FOR YOUR EVERYDAY.</span></div></footer>
-<div class="modal" id="cartModal" role="dialog"
+<div class="modal" id="cartModal" role="dialog" aria-modal="true" aria-label="Your shopping bag"><div class="modal-box"><div class="modal-head"><h2>Your Bag</h2><button class="close" id="closeCart">CLOSE ✕</button></div><div id="cartItems"></div><div class="total"><span>Estimated total</span><span id="cartTotal">₹0</span></div><button class="btn btn-gold" style="width:100%" id="checkout">CONTINUE VIA WHATSAPP ↗</button><p class="note">WhatsApp ordering needs your own number in the code. Prices and stock should be confirmed before purchase.</p></div></div><div class="toast" id="toast"></div>
+<script>
+const productsData=[
+{id:1,name:"The Everyday Top",cat:"Women",price:599,old:899,img:"https://images.unsplash.com/photo-1551232864-3f0890e580d9?auto=format&fit=crop&w=800&q=85",badge:"THE EDIT"},
+{id:2,name:"Relaxed Streetwear Tee",cat:"Men",price:499,old:699,img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85",badge:"ESSENTIAL"},
+{id:3,name:"Urban Runner Sneakers",cat:"Shoes",price:1299,old:1699,img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85",badge:"TRENDING"},
+{id:4,name:"Everyday Mini Bag",cat:"Accessories",price:799,old:1099,img:"https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=85",badge:"JUST IN"},
+{id:5,name:"Minimal Outfit Edit",cat:"Women",price:999,old:1399,img:"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=85",badge:"STYLE PICK"},
+{id:6,name:"Classic Casual Shirt",cat:"Men",price:749,old:999,img:"https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=85",badge:"EVERYDAY"},
+{id:7,name:"Clean White Sneakers",cat:"Shoes",price:1199,old:1599,img:"https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=85",badge:"BESTSELLER"},
+{id:8,name:"Statement Handbag",cat:"Accessories",price:899,old:1199,img:"https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?auto=format&fit=crop&w=800&q=85",badge:"FINISHING TOUCH"},
+{id:9,name:"Premium Black Shirt",cat:"Men",price:799,old:1199,img:"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=85",badge:"NEW ARRIVAL"},
+{id:10,name:"Classic White Shirt",cat:"Men",price:699,old:999,img:"https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=800&q=85",badge:"NEW ARRIVAL"},
+{id:11,name:"Slim Fit Blue Jeans",cat:"Men",price:999,old:1499,img:"https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800&q=85",badge:"NEW ARRIVAL"},
+{id:12,name:"Urban Black Jeans",cat:"Men",price:1099,old:1599,img:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=85",badge:"NEW ARRIVAL"}
+];
+let cart=[],activeFilter="All";
+const money=n=>"₹"+Number(n).toLocaleString("en-IN");
+function sizeOptions(p){
+  if(p.cat==="Shoes") return ["6","7","8","9","10"].map(s=>`<option value="${s}">UK ${s}</option>`).join("");
+  if(p.cat==="Accessories") return '<option value="One Size">One Size</option>';
+  return ["XS","S","M","L","XL","XXL"].map(s=>`<option value="${s}">${s}</option>`).join("");
+}
+function renderProducts(){
+ const list=productsData.filter(p=>activeFilter==="All"||p.cat===activeFilter);
+ document.getElementById("products").innerHTML=list.map(p=>`<article class="product"><div class="product-photo"><img loading="lazy" src="${p.img}" alt="${p.name}" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80'"><span class="badge">${p.badge}</span></div><div class="product-details"><div class="product-cat">${p.cat}</div><h3>${p.name}</h3><div class="price">${money(p.price)} <span class="old">${money(p.old)}</span></div><label class="size-label" for="size-${p.id}">${p.cat==="Shoes"?"Select shoe size":p.cat==="Accessories"?"Size":"Select clothing size"}</label><select class="size-select" id="size-${p.id}">${sizeOptions(p)}</select><div class="product-bottom"><div class="swatches"><i style="background:#171717"></i><i style="background:#e9e5dc"></i><i style="background:#34445b"></i></div><button class="add" onclick="addToCart(${p.id})">ADD TO BAG +</button></div></div></article>`).join("")
+}
+function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000)}
+function addToCart(id){
+ const p=productsData.find(x=>x.id===id);const size=document.getElementById(`size-${id}`).value;
+ let x=cart.find(a=>a.id===id&&a.size===size);if(x)x.qty++;else cart.push({id,size,qty:1});
+ updateCart();toast(`${p.name} (${size}) added to your bag ✦`)
+}
+function updateCart(){
+ document.getElementById("cartCount").textContent=cart.reduce((s,x)=>s+x.qty,0);let el=document.getElementById("cartItems");
+ if(!cart.length){el.innerHTML='<div class="empty">Your bag is waiting for the right piece.</div>';document.getElementById("cartTotal").textContent="₹0";return}
+ el.innerHTML=cart.map(x=>{let p=productsData.find(y=>y.id===x.id);return `<div class="cart-row"><img src="${p.img}" alt=""><div><strong>${p.name}</strong><small style="display:block;margin-top:5px">Size: ${x.size} · ${money(p.price)} each</small><div class="qty"><button onclick="changeQty(${p.id},'${x.size}',-1)">−</button><span>${x.qty}</span><button onclick="changeQty(${p.id},'${x.size}',1)">+</button></div></div><div><strong>${money(p.price*x.qty)}</strong><br><button class="remove" onclick="removeItem(${p.id},'${x.size}')">REMOVE</button></div></div>`}).join("");
+ document.getElementById("cartTotal").textContent=money(cart.reduce((s,x)=>s+productsData.find(p=>p.id===x.id).price*x.qty,0))
+}
+function changeQty(id,size,d){let x=cart.find(y=>y.id===id&&y.size===size);if(!x)return;x.qty+=d;if(x.qty<1)cart=cart.filter(y=>!(y.id===id&&y.size===size));updateCart()}
+function removeItem(id,size){cart=cart.filter(x=>!(x.id===id&&x.size===size));updateCart()}
+document.getElementById("filters").addEventListener("click",e=>{let b=e.target.closest("[data-filter]");if(!b)return;activeFilter=b.dataset.filter;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));renderProducts()});
+document.querySelectorAll("[data-category]").forEach(a=>a.addEventListener("click",()=>{activeFilter=a.dataset.category;document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x.dataset.filter===activeFilter));renderProducts()}));
+const modal=document.getElementById("cartModal");document.getElementById("openCart").onclick=()=>{modal.classList.add("show");updateCart()};document.getElementById("closeCart").onclick=()=>modal.classList.remove("show");modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+document.getElementById("checkout").onclick=()=>{if(!cart.length){toast("Add a product to your bag first.");return}const phone="917849019580"; // Replace with your WhatsApp number: country code + number, digits only.
+if(phone.includes("X")){toast("Add your WhatsApp number in the code before taking orders.");return}let lines=cart.map(x=>{let p=productsData.find(y=>y.id===x.id);return `${p.name} | Size: ${x.size} | Qty: ${x.qty} — ${money(p.price*x.qty)}`});let total=cart.reduce((s,x)=>s+productsData.find(p=>p.id===x.id).price*x.qty,0);let msg=`Hello ZORVÉYA! I'd like to enquire about an order:\n${lines.join("\n")}\nEstimated total: ${money(total)}\nPlease confirm availability, final price and delivery.`;window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank")};
+document.getElementById("menuToggle").onclick=()=>document.getElementById("navLinks").classList.toggle("open");document.querySelectorAll(".navlinks a").forEach(a=>a.addEventListener("click",()=>document.getElementById("navLinks").classList.remove("open")));
+document.getElementById("year").textContent=new Date().getFullYear();document.getElementById("yearBottom").textContent=new Date().getFullYear();renderProducts();updateCart();
+</script>
+</body></html>
