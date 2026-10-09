@@ -60,7 +60,10 @@ const productsData=[
 {id:6,name:"Classic Casual Shirt",cat:"Men",price:749,old:999,img:"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=650&q=80",badge:"EVERYDAY"},
 {id:7,name:"Clean White Sneakers",cat:"Shoes",price:1199,old:1599,img:"https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=650&q=80",badge:"BESTSELLER"},
 {id:8,name:"Statement Handbag",cat:"Accessories",price:899,old:1199,img:"https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=650&q=80",badge:"FINISHING TOUCH"}
-];
+{id:9,name:"Premium Black Shirt",cat:"Men",price:799,old:1199,img:"https://images.unsplash.com/photo-1596755094514-f87e34085b2c"},
+{id:10,name:"Classic White Shirt",cat:"Men",price:699,old:999,img:"https://images.unsplash.com/photo-1603252109303-2751441dd157"},
+{id:11,name:"Slim Fit Blue Jeans",cat:"Men",price:999,old:1499,img:"https://images.unsplash.com/photo-1542272604-787c3835535d"},
+{id:12,name:"Urban Black Jeans",cat:"Men",price:1099,old:1599,img:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246"},
 let cart=[];
 function renderProducts(cat="All"){let list=productsData.filter(p=>cat==="All"||p.cat===cat);document.getElementById("products").innerHTML=list.map(p=>`<article class="product"><div class="product-img"><span class="badge">${p.badge}</span><img loading="lazy" src="${p.img}" alt="${p.name}"></div><div class="pinfo"><small>${p.cat.toUpperCase()}</small><h3>${p.name}</h3><span class="price">₹${p.price}</span><span class="old">₹${p.old}</span><button class="add" onclick="addToCart(${p.id})">ADD TO BAG +</button></div></article>`).join("")}
 function filterProducts(cat,btn){document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"));btn.classList.add("active");renderProducts(cat)}
